@@ -1,0 +1,24 @@
+Trong hệ thống bán hàng giày dép hiện tại, nếu chưa có chức năng phân quyền phù hợp, mọi người có thể truy cập và chỉnh sửa toàn bộ thông tin trong hệ thống mà không có sự kiểm soát. Ví dụ, nhân viên bán hàng có thể vô tình hoặc cố ý thay đổi giá sản phẩm, khuyến mãi hoặc xóa đơn hàng, trong khi những dữ liệu nhạy cảm như doanh thu, thông tin khách hàng và báo cáo kinh doanh lại bị mở rộng lộ diện cho quá nhiều người. Những vấn đề này khiến cấu trúc công việc bị lẫn lộn, làm tăng nguy cơ sai sót trong quy trình và khả năng lộ lọt thông tin quan trọng.
+
+Giải pháp nằm ở việc triển khai module phân quyền: hệ thống sẽ xác định rõ vai trò của từng người dùng và giới hạn chức năng dựa trên vai trò đó. Người quản trị hệ thống (Admin) có thể tạo các vai trò riêng biệt như Manager và Nhân viên bán hàng, rồi gán quyền hạn cụ thể cho từng vai trò. Như vậy, Admin định rõ ai được phép xem và sửa đổi các thông tin nào trong hệ thống. Ví dụ, chỉ Admin và Quản lý mới có quyền thay đổi giá bán sản phẩm hoặc xem báo cáo tài chính, trong khi Nhân viên chỉ được xử lý đơn hàng và cập nhật thông tin liên quan đến bán hàng của mình. Hệ thống nhờ vậy hạn chế sai sót và lạm dụng quyền, giúp quy trình vận hành cửa hàng diễn ra an toàn và hiệu quả hơn.
+
+Giải pháp của Module Giao hàng (Shipping Module) cho dự án
+Bên cạnh việc phân quyền, việc tích hợp Module Giao hàng mang lại giải pháp toàn diện để giải quyết bài toán vận hành logistics cho dự án web bán giày dép này:
+
+Đối với từng vai trò chính, module phân quyền mang lại các lợi ích cụ thể như sau:
+-Quy trình Phân công (Assignment) Minh bạch và Tức thời
+-Đồng bộ Trạng thái Đơn hàng theo Thời gian thực (Real-time Tracking)
+-Khép kín Chu trình Bán hàng
+
+Admin: Được cung cấp toàn quyền quản lý hệ thống, bao gồm thiết lập tài khoản người dùng, gán vai trò và cấp phép chi tiết cho từng nhân sự. Nhờ đó, Admin hoàn toàn kiểm soát được ai có thể truy cập dữ liệu nhạy cảm và ai có thể thực hiện các chức năng quản lý then chốt. Điều này giúp Admin yên tâm rằng hệ thống hoạt động an toàn, đúng quy trình và ngăn chặn được tình trạng nhân viên lạm quyền gây mất ổn định.
+
+Manager: Được quyền truy cập các thông tin phù hợp với công việc của mình, như báo cáo doanh số, tình trạng tồn kho của cửa hàng hoặc hoạt động của đội ngũ nhân viên. Nhờ đó, Quản lý dễ dàng tập trung vào công việc điều hành và theo dõi hiệu quả kinh doanh của cửa hàng mình phụ trách. Quản lý cũng không cần phải thao tác vào các phần thiết lập cao hơn (ví dụ như phân quyền người dùng hoặc thông tin bảo mật của công ty), giúp tránh nhầm lẫn và đảm bảo hệ thống hoạt động trơn tru.
+
+Staff : Chỉ được phép sử dụng những chức năng thiết yếu cho công việc hàng ngày, ví dụ như tạo và xử lý đơn hàng, kiểm tra tình trạng tồn kho và hỗ trợ khách hàng. Phân quyền đảm bảo nhân viên không thể truy cập vào các phần quản lý cấp cao hơn như báo cáo tài chính hay thay đổi bảng giá, giúp họ tránh nhầm lẫn và làm việc hiệu quả hơn. Khi quyền hạn rõ ràng, mỗi nhân viên cũng tự tin tập trung vào công việc của mình, vì biết mọi thao tác đều được ghi nhận chặt chẽ và hạn chế rủi ro sai sót trong vận hành.
+
+Customer: Khi truy cập hệ thống mua sắm (trên website hoặc ứng dụng), khách hàng chỉ nhìn thấy giao diện mua hàng và thông tin tài khoản của chính mình (đơn hàng, lịch sử giao dịch, phương thức thanh toán, v.v.). Phân quyền ngăn khách hàng xem hoặc thay đổi thông tin nhạy cảm của người khác, đảm bảo quyền riêng tư được bảo vệ nghiêm ngặt. Nhờ đó, khách hàng cảm thấy yên tâm hơn khi giao dịch, tin tưởng cung cấp dữ liệu cá nhân và hài lòng với trải nghiệm mua sắm trên hệ thống.
+
+Shipper (Nhân viên giao hàng): Được cấp quyền truy cập hạn chế và chuyên biệt, chỉ nhìn thấy danh sách các đơn hàng được Manager hoặc Admin phân công cụ thể cho mình (View Assigned Orders). Shipper có thể xem các thông tin giao nhận thiết yếu (tên khách hàng, địa chỉ giao, số điện thoại, ghi chú giao hàng) và thực hiện tác vụ cập nhật trạng thái đơn hàng (ví dụ: chuyển từ "Đang giao" sang "Đã giao" hoặc "Giao thất bại"). Việc phân quyền này đảm bảo Shipper có đủ thông tin để hoàn thành nhiệm vụ vận chuyển, nhưng ngăn chặn hoàn toàn việc truy cập vào dữ liệu nhạy cảm khác như tổng doanh thu cửa hàng, giá vốn sản phẩm hay danh sách khách hàng không thuộc phạm vi quản lý, giúp bảo mật dữ liệu kinh doanh tuyệt đối.
+
+
+Tóm lại, module phân quyền trong hệ thống bán hàng giày dép giúp phân chia rõ ràng vai trò và quyền hạn của mỗi người dùng trong hoạt động thực tế của cửa hàng. Điều này mang lại sự an toàn dữ liệu, minh bạch quy trình và nâng cao hiệu quả làm việc cho Admin, Quản lý, nhân viên cũng như tạo sự tin tưởng, hài lòng cho khách hàng.

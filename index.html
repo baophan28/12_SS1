@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ShoesShop</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a2d9b2b8b6.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root { --glass-bg: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12); }
+    html,body { height:100%; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+    
+    /* Màu sắc nhận diện Role */
+    .neon { color: #22d3ee; } /* Cyan - Manager */
+    .neon-purple { color: #c084fc; } /* Purple - Customer */
+    .neon-red { color: #f87171; } /* Red - Admin */
+    .neon-yellow { color: #facc15; } /* Yellow - Shipper */
+    .neon-green { color: #4ade80; } /* Green - Success */
+
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 10px; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+  <div id="app" class="min-h-screen p-4 md:p-8">
+    <header class="mb-6 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="p-3 glass rounded-2xl flex items-center gap-3">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" class="neon">
+            <path d="M3 12h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6 6h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6 18h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <div class="leading-none">
+            <div class="text-lg font-semibold neon">ShoesShop</div>
+          
+          </div>
+        </div>
+      </div>
+      <div id="headerActions" class="flex items-center gap-3"></div>
+    </header>
+
+    <main id="mainContent" class="grid grid-cols-1"></main>
+
+    <div id="assignModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+      <div class="absolute inset-0 bg-black/60"></div>
+      <div class="relative w-full max-w-lg mx-4 glass rounded-2xl p-6 z-10">
+        <h3 class="text-xl font-semibold neon mb-2">Phân công Shipper</h3>
+        <p class="text-sm text-slate-300 mb-4">Chọn shipper giao đơn <span id="assignShipmentLabel" class="font-medium"></span></p>
+        <div id="assignShipperList" class="max-h-64 overflow-auto space-y-2 mb-4"></div>
+        <div class="flex justify-end gap-2">
+          <button id="assignCancelBtn" class="px-4 py-2 rounded-lg glass border hover:opacity-90">Hủy</button>
+          <button id="assignConfirmBtn" class="px-4 py-2 rounded-lg bg-cyan-500/20 neon border border-cyan-400 hover:opacity-90" disabled>Gán Ngay</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="createUserModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+      <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeCreateUserModal()"></div>
+      <div class="relative w-full max-w-md mx-4 glass bg-slate-900 rounded-2xl p-6 z-10 border border-white/10 shadow-2xl">
+        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <i class="fa fa-user-plus text-green-400"></i> Thêm Nhân Sự Mới
+        </h3>
+        <div class="space-y-3">
+            <div>
+                <label class="text-xs text-slate-400 block mb-1">Tên đăng nhập (*)</label>
+                <input id="newUsername" type="text" class="w-full p-2 rounded bg-black/40 border border-white/10 focus:border-green-400 outline-none text-white text-sm" placeholder="VD: staff_hanoi">
+            </div>
+            <div>
+                <label class="text-xs text-slate-400 block mb-1">Mật khẩu (*)</label>
+                <input id="newPassword" type="text" class="w-full p-2 rounded bg-black/40 border border-white/10 focus:border-green-400 outline-none text-white text-sm" value="123">
+            </div>
+            <div>
+                <label class="text-xs text-slate-400 block mb-1">Họ và tên</label>
+                <input id="newFullname" type="text" class="w-full p-2 rounded bg-black/40 border border-white/10 focus:border-green-400 outline-none text-white text-sm" placeholder="VD: Nguyễn Văn A">
+            </div>
+            <div>
+                <label class="text-xs text-slate-400 block mb-1">Vai trò </label>
+                <select id="newRole" class="w-full p-2 rounded bg-black/40 border border-white/10 focus:border-green-400 outline-none text-white text-sm">
+                    <option value="Staff">Staff (Nhân viên)</option>
+                    <option value="Manager">Manager (Quản lý)</option>
+                    <option value="Shipper">Shipper (Giao hàng)</option>
+                    <option value="Customer">Customer (Khách hàng)</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 mt-6 pt-4 border-t border-white/5">
+          <button onclick="closeCreateUserModal()" class="px-4 py-2 rounded-lg text-sm hover:bg-white/5 text-slate-300">Hủy</button>
+          <button onclick="submitCreateUser()" class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold text-sm shadow-lg shadow-green-900/50">
+              <i class="fa fa-check mr-1"></i> Tạo Tài Khoản
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  /* --- CẤU HÌNH API --- */
+  const API_URL = 'http://localhost:5000/api'; 
+
+  /* --- CORE HELPER FUNCTIONS --- */
+  function saveUserToLocal(userObj) { localStorage.setItem('shopgiay_user', JSON.stringify(userObj)); }
+  function loadUserFromLocal() { const raw = localStorage.getItem('shopgiay_user'); return raw ? JSON.parse(raw) : null; }
+  function clearUser() { localStorage.removeItem('shopgiay_user'); }
+
+  function createEl(tag, props={}) {
+    const el = document.createElement(tag);
+    Object.entries(props).forEach(([k,v]) => {
+      if(k==='className') el.className=v; else if(k==='innerHTML') el.innerHTML=v; else if(k==='onclick') el.addEventListener('click', v); else el.setAttribute(k,v);
+    });
+    return el;
+  }
+
+  // --- INIT APP ---
+  document.addEventListener('DOMContentLoaded', () => { initApp(); });
+
+  async function initApp() {
+    const user = loadUserFromLocal();
+    renderHeaderActions(user);
+
+    if (!user) {
+      renderLoginScreen();
+    } else {
+      // --- ĐIỀU HƯỚNG THEO ROLE ---
+      if (user.RoleName === 'Admin') renderAdminView(user); 
+      else if (user.RoleName === 'Shipper') renderShipperView(user);
+      else if (['Manager', 'Staff'].includes(user.RoleName)) renderManagerView(user);
+      else if (user.RoleName === 'Customer') renderCustomerView(user);
+      else {
+          document.getElementById('mainContent').innerHTML = `
+            <div class="text-center p-10 glass rounded-xl border border-red-500/50">
+                <div class="text-red-400 text-xl font-bold mb-2">Tài khoản bị hạn chế</div>
+                <div class="text-slate-300">Quyền hạn (<b>${user.RoleName}</b>) không hợp lệ.</div>
+                <button onclick="clearUser(); location.reload()" class="mt-4 px-4 py-2 bg-red-500/20 text-red-300 rounded border border-red-500/50">Đăng xuất</button>
+            </div>`;
+      }
+    }
+    
+    const cancelBtn = document.getElementById('assignCancelBtn');
+    if(cancelBtn) cancelBtn.addEventListener('click', closeAssignModal);
+  }
+
+  function renderHeaderActions(user) {
+    const header = document.getElementById('headerActions');
+    header.innerHTML = '';
+    if (user) {
+      const who = createEl('div', { className: 'text-right mr-2 flex items-center gap-2' });
+      let roleColor = 'text-cyan-400';
+      if (user.RoleName === 'Admin') roleColor = 'text-red-400 font-bold';
+      if (user.RoleName === 'Shipper') roleColor = 'text-yellow-400';
+      if (user.RoleName === 'Customer') roleColor = 'text-purple-400';
+
+      who.innerHTML = `<div class="text-sm text-slate-300">Xin chào</div><div class="flex items-center gap-2"><span class="text-sm font-semibold neon">${user.Username} <span class="text-xs ${roleColor}">(${user.RoleName})</span></span><button title="Đăng xuất" class="ml-2 px-2 py-1 rounded-lg glass border hover:opacity-90" onclick="clearUser(); location.reload();"><i class='fas fa-sign-out-alt'></i></button></div>`;
+      header.appendChild(who);
+    }
+  }
+
+  /* =================================================================
+     LOGIN SCREEN (ĐÃ THÊM MẬT KHẨU)
+     ================================================================= */
+  function renderLoginScreen() {
+    const main = document.getElementById('mainContent');
+    main.innerHTML = `
+      <section class="max-w-md mx-auto glass rounded-2xl p-8 mt-10">
+        <h1 class="text-2xl font-bold neon mb-6 text-center">ShoesShop</h1>
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Tên đăng nhập</label>
+            <input id="username" class="w-full p-3 rounded bg-black/20 border border-white/10 text-white focus:border-cyan-400 outline-none" placeholder="Username" />
+          </div>
+          
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Mật khẩu</label>
+            <input id="password" type="password" class="w-full p-3 rounded bg-black/20 border border-white/10 text-white focus:border-cyan-400 outline-none" placeholder="Nhập mật khẩu" />
+          </div>
+
+          <button id="btnLogin" class="w-full py-3 mt-2 rounded bg-cyan-500/20 neon border border-cyan-400 hover:bg-cyan-500/30 font-bold transition-all">TRUY CẬP HỆ THỐNG</button>
+        </div>
+      </section>
+    `;
+    
+    document.getElementById('btnLogin').onclick = handleLogin;
+    document.getElementById('username').addEventListener('keypress', (e) => { if(e.key==='Enter') handleLogin(); });
+    document.getElementById('password').addEventListener('keypress', (e) => { if(e.key==='Enter') handleLogin(); });
+  }
+
+  async function handleLogin() {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+
+    if(!u || !p) return alert("Vui lòng nhập đầy đủ thông tin!");
+
+    try {
+      const res = await fetch(`${API_URL}/login`, { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          // Gửi cả Password lên Server
+          body: JSON.stringify({ username: u, password: p }) 
+      });
+      
+      const data = await res.json();
+      if (data.success) { 
+          saveUserToLocal(data.user); // Lưu user chuẩn
+          location.reload(); 
+      } else { 
+          alert('Lỗi: ' + data.message); 
+      }
+    } catch (err) { 
+        alert('Không kết nối được Server Python! Hãy kiểm tra lại.'); 
+    }
+  }
+
+  /* =================================================================
+     1. VIEW: ADMIN 
+     ================================================================= */
+  async function renderAdminView(user) {
+    const main = document.getElementById('mainContent');
+    main.innerHTML = `
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl neon-red font-bold uppercase"><i class="fa fa-user-shield mr-2"></i>Quản trị Hệ Thống</h2>
+        <div class="flex gap-2">
+            <button onclick="openCreateUserModal()" class="text-sm bg-green-600/20 text-green-400 border border-green-600/50 px-3 py-1 rounded hover:bg-green-600/30 transition-all flex items-center gap-1">
+                <i class="fa fa-user-plus"></i> Thêm Nhân Sự
+            </button>
+            <button onclick="initApp()" class="text-sm glass px-3 py-1 rounded hover:bg-white/10"><i class="fa fa-refresh"></i> Refresh</button>
+        </div>
+      </div>
+      
+      <div class="glass rounded-2xl p-4 overflow-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-slate-400 text-xs border-b border-white/10">
+              <th class="p-3">ID</th>
+              <th class="p-3">Tài khoản</th>
+              <th class="p-3">Họ Tên</th>
+              <th class="p-3">Vai trò</th>
+              <th class="p-3 text-right">Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="adminUserTable"><tr><td colspan="5" class="p-4 text-center">Đang tải...</td></tr></tbody>
+        </table>
+      </div>
+    `;
+
+    try {
+      const res = await fetch(`${API_URL}/admin/users`);
+      const users = await res.json();
+      const tbody = document.getElementById('adminUserTable');
+      if(users.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4">Trống</td></tr>'; return; }
+
+      tbody.innerHTML = users.map(u => `
+        <tr class="border-b border-white/5 hover:bg-white/5">
+            <td class="p-3 text-slate-400 font-mono">#${u.UserID}</td>
+            <td class="p-3 font-bold text-white">${u.Username}</td>
+            <td class="p-3 text-sm text-slate-300">${u.FullName || '---'}</td>
+            <td class="p-3">
+                <span class="px-2 py-1 rounded text-xs font-bold border 
+                    ${u.RoleName==='Admin'?'border-red-500 text-red-400':
+                     (u.RoleName==='Shipper'?'border-yellow-500 text-yellow-400':
+                     (u.RoleName==='Customer'?'border-purple-500 text-purple-400':'border-cyan-500 text-cyan-400'))}">
+                    ${u.RoleName}
+                </span>
+            </td>
+            <td class="p-3 text-right flex justify-end gap-2">
+                ${u.RoleName !== 'Chưa có quyền' && u.Username !== 'admin_user' ? 
+                    `<button onclick="revokeRole(${u.UserID}, '${u.Username}')" class="px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/30 rounded hover:bg-red-500/30 text-xs">
+                        <i class="fa fa-ban mr-1"></i>Cắt
+                    </button>` : ''
+                }
+                <div class="relative group">
+                    <button class="px-3 py-1 glass border hover:bg-white/10 rounded text-xs"><i class="fa fa-pen mr-1"></i>Gán</button>
+                    <div class="absolute right-0 mt-1 w-32 glass bg-slate-900 border border-slate-700 rounded shadow-xl hidden group-hover:block z-50 text-left">
+                        <div onclick="grantRole(${u.UserID}, 'Manager')" class="p-2 hover:bg-cyan-500/20 text-cyan-400 cursor-pointer text-xs">Manager</div>
+                        <div onclick="grantRole(${u.UserID}, 'Staff')" class="p-2 hover:bg-cyan-500/20 text-cyan-200 cursor-pointer text-xs">Staff</div>
+                        <div onclick="grantRole(${u.UserID}, 'Shipper')" class="p-2 hover:bg-yellow-500/20 text-yellow-400 cursor-pointer text-xs">Shipper</div>
+                        <div onclick="grantRole(${u.UserID}, 'Customer')" class="p-2 hover:bg-purple-500/20 text-purple-400 cursor-pointer text-xs">Customer</div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+      `).join('');
+    } catch(e) { console.error(e); }
+  }
+
+  // --- LOGIC MODAL TẠO USER ---
+  function openCreateUserModal() {
+      document.getElementById('createUserModal').classList.remove('hidden');
+      document.getElementById('createUserModal').classList.add('flex');
+  }
+  function closeCreateUserModal() {
+      document.getElementById('createUserModal').classList.add('hidden');
+      document.getElementById('createUserModal').classList.remove('flex');
+      document.getElementById('newUsername').value = '';
+      document.getElementById('newFullname').value = '';
+  }
+  async function submitCreateUser() {
+      const u = document.getElementById('newUsername').value.trim();
+      const p = document.getElementById('newPassword').value.trim();
+      const f = document.getElementById('newFullname').value.trim();
+      const r = document.getElementById('newRole').value;
+
+      if(!u || !p) return alert("Vui lòng nhập Username và Password!");
+
+      try {
+          const res = await fetch(`${API_URL}/admin/create-user`, {
+              method: 'POST', headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ username: u, password: p, fullname: f, role_name: r })
+          });
+          const data = await res.json();
+          if(data.success) { alert(data.message); closeCreateUserModal(); initApp(); } 
+          else { alert("Lỗi: " + data.message); }
+      } catch(e) { alert("Lỗi kết nối Server!"); }
+  }
+
+  // Logic Admin cũ (Cắt quyền/Cấp quyền)
+  async function revokeRole(userId, username) {
+      if(!confirm(`Cắt quyền của [${username}]?`)) return;
+      try {
+        const res = await fetch(`${API_URL}/admin/revoke-role`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ user_id: userId }) });
+        const data = await res.json();
+        if(data.success) { alert('Thành công!'); initApp(); } else alert('Lỗi: ' + data.error);
+      } catch(e) { alert("Lỗi API"); }
+  }
+  async function grantRole(userId, roleName) {
+      if(!confirm(`Gán quyền [${roleName}]?`)) return;
+      try {
+        const res = await fetch(`${API_URL}/admin/grant-role`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ user_id: userId, role_name: roleName }) });
+        const data = await res.json();
+        if(data.success) { alert('Thành công!'); initApp(); } else alert('Lỗi: ' + data.error);
+      } catch(e) { alert("Lỗi API"); }
+  }
+
+  /* =================================================================
+     2. VIEW: CUSTOMER 
+     ================================================================= */
+  async function renderCustomerView(user) {
+      const main = document.getElementById('mainContent');
+      const products = [
+          { name: 'Nike Air Jordan 1', price: 5000000, img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300' },
+          { name: 'Adidas Ultraboost', price: 3200000, img: 'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=300' },
+          { name: 'Puma Running X', price: 1800000, img: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=300' },
+          { name: 'Biti\'s Hunter', price: 900000, img: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=300' }
+      ];
+      main.innerHTML = `
+        <div class="mb-8">
+            <h2 class="text-2xl neon-purple mb-4 font-bold flex items-center"><i class="fa fa-store mr-2"></i>Cửa Hàng</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                ${products.map(p => `
+                    <div class="glass rounded-xl p-3 flex flex-col hover:border-purple-400 transition-colors group relative">
+                        <div class="overflow-hidden rounded-lg mb-3 h-32 bg-black/30">
+                            <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                        </div>
+                        <div class="font-bold text-sm truncate">${p.name}</div>
+                        <div class="text-slate-400 text-xs mb-2">${p.price.toLocaleString()} VND</div>
+                        <button onclick="handleCreateOrder('${p.name}', ${p.price})" class="mt-auto py-2 bg-purple-500/20 border border-purple-500/50 rounded text-purple-300 hover:bg-purple-500/40 text-xs font-bold transition-all active:scale-95">
+                            <i class="fa fa-cart-plus mr-1"></i> ĐẶT MUA
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        <div>
+            <h2 class="text-2xl neon-purple mb-4 font-bold"><i class="fa fa-history mr-2"></i>Lịch sử Đơn hàng</h2>
+            <div class="glass rounded-2xl p-4 overflow-auto">
+                <table class="w-full text-left text-sm">
+                    <thead><tr class="text-slate-400 border-b border-white/10"><th class="p-3">Mã đơn</th><th class="p-3">Sản phẩm</th><th class="p-3">Shipper</th><th class="p-3">Trạng thái</th></tr></thead>
+                    <tbody id="customerOrdersBody"><tr><td colspan="4" class="p-4 text-center">Đang tải...</td></tr></tbody>
+                </table>
+            </div>
+        </div>`;
+      loadCustomerOrders(user.UserID);
+  }
+  async function handleCreateOrder(productName, price) {
+    const user = loadUserFromLocal();
+    if(!confirm(`Mua: ${productName} - ${price.toLocaleString()} VND?`)) return;
+    try {
+        const res = await fetch(`${API_URL}/create-order`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ user_id: user.UserID, amount: price, address: 'Địa chỉ của ' + user.Username, note: 'Mua: ' + productName })
+        });
+        const data = await res.json();
+        if(data.success) { alert("Thành công!"); loadCustomerOrders(user.UserID); } else alert("Lỗi: " + data.error);
+    } catch(e) { alert("Lỗi Server: " + e); }
+  }
+  async function loadCustomerOrders(userId) {
+      try {
+        const res = await fetch(`${API_URL}/shipments`);
+        const allList = await res.json();
+        const tbody = document.getElementById('customerOrdersBody');
+        if(allList.length === 0) tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">Trống</td></tr>';
+        else tbody.innerHTML = allList.map(s => `
+            <tr class="border-b border-white/5 hover:bg-white/5"><td class="p-3 font-mono text-purple-300">#${s.ShipmentID}</td><td class="p-3 italic text-slate-300">${s.Notes || '---'}</td><td class="p-3 text-yellow-500">${s.ShipperName || 'Chưa gán'}</td><td class="p-3"><span class="px-2 py-1 rounded text-xs border ${s.Status==='Pending'?'border-orange-500 text-orange-400':(s.Status==='Delivered'?'border-green-500 text-green-400':'border-blue-500 text-blue-400')}">${s.Status}</span></td></tr>`).join('');
+      } catch(e) { console.error(e); }
+  }
+
+  /* =================================================================
+     3. VIEW: MANAGER 
+     ================================================================= */
+  async function renderManagerView(user) {
+    const main = document.getElementById('mainContent');
+    main.innerHTML = `
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl neon font-bold"><i class="fa fa-tasks mr-2"></i>Quản Lý Giao Vận</h2>
+        <button onclick="initApp()" class="text-sm glass px-3 py-1 rounded hover:bg-white/10"><i class="fa fa-refresh"></i> Refresh</button>
+      </div>
+      <div class="glass rounded-2xl p-4 overflow-auto">
+        <table class="w-full text-left border-collapse">
+          <thead><tr class="text-slate-400 text-xs border-b border-white/10"><th class="p-3">ID</th><th class="p-3">Nội dung</th><th class="p-3">Địa chỉ</th><th class="p-3">Shipper</th><th class="p-3">Status</th><th class="p-3 text-right">Action</th></tr></thead>
+          <tbody id="managerTableBody"><tr><td colspan="6" class="p-4 text-center">Đang tải...</td></tr></tbody>
+        </table>
+      </div>`;
+    try {
+      const res = await fetch(`${API_URL}/shipments`);
+      const shipments = await res.json();
+      const tbody = document.getElementById('managerTableBody');
+      if (shipments.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Trống</td></tr>`; return; }
+      tbody.innerHTML = shipments.map(s => `
+        <tr class="border-b border-white/5 hover:bg-white/5">
+          <td class="p-3 neon font-mono">#${s.ShipmentID}</td><td class="p-3 text-sm italic">${s.Notes || '---'}</td><td class="p-3 text-sm text-slate-300">${s.Address}</td><td class="p-3 text-sm text-yellow-400 font-semibold">${s.ShipperName || 'Chưa gán'}</td>
+          <td class="p-3"><span class="px-2 py-1 rounded text-xs border ${s.Status==='Pending'?'border-orange-500 text-orange-400':(s.Status==='Delivered'?'border-green-500 text-green-400':'border-blue-500 text-blue-400')}">${s.Status}</span></td>
+          <td class="p-3 text-right">${!s.AssignedTo ? `<button onclick="openAssignModal(${s.ShipmentID}, '${s.Address}')" class="px-3 py-1 rounded glass text-xs hover:text-cyan-400 border border-transparent hover:border-cyan-400 transition-colors">Gán Shipper</button>` : `<span class="text-xs text-slate-500"><i class="fa fa-check"></i> Đã gán</span>`}</td>
+        </tr>`).join('');
+    } catch (e) { document.getElementById('managerTableBody').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-400">Lỗi: ${e}</td></tr>`; }
+  }
+
+  /* =================================================================
+     4. VIEW: SHIPPER 
+     ================================================================= */
+  async function renderShipperView(user) {
+    const main = document.getElementById('mainContent');
+    main.innerHTML = `
+      <div class="flex justify-between items-center mb-4">
+         <h2 class="text-xl neon-yellow font-bold"><i class="fa fa-truck mr-2"></i>Đơn hàng cần giao (${user.Username})</h2>
+         <button onclick="initApp()" class="text-sm glass px-3 py-1 rounded hover:bg-white/10"><i class="fa fa-refresh"></i> Refresh</button>
+      </div>
+      <div id="shipperGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">Loading...</div>`;
+    try {
+        const res = await fetch(`${API_URL}/shipments`);
+        const allShipments = await res.json();
+        const myShipments = allShipments.filter(s => s.AssignedTo == user.UserID);
+        const container = document.getElementById('shipperGrid');
+        if (myShipments.length === 0) { container.innerHTML = '<div class="text-slate-400 col-span-2 text-center py-8 glass rounded-xl">Chưa có đơn hàng nào.</div>'; return; }
+        container.innerHTML = myShipments.map(s => `
+        <div class="glass p-4 rounded-xl border border-white/10 relative hover:border-yellow-500/30 transition-colors">
+            <div class="flex justify-between mb-2"><span class="neon-yellow font-bold text-lg">#${s.ShipmentID}</span><span class="text-xs px-2 py-1 h-fit rounded ${s.Status==='Pending'?'bg-orange-500/20 text-orange-400':'bg-blue-500/20 text-blue-400'}">${s.Status}</span></div>
+            <div class="text-sm text-white mb-1"><i class="fa fa-map-marker-alt mr-2 text-slate-400"></i>${s.Address}</div>
+            <div class="text-xs text-slate-400 italic mb-4 ml-6">${s.Notes || 'Không ghi chú'}</div>
+            <div class="flex gap-2 justify-end mt-4 pt-4 border-t border-white/5">
+            ${s.Status !== 'Delivered' ? `<button onclick="updateStatus(${s.ShipmentID}, '${getNextStatus(s.Status)}')" class="w-full py-2 rounded bg-yellow-500/10 text-yellow-400 text-sm border border-yellow-500/30 hover:bg-yellow-500/20 transition-all"><i class="fa fa-arrow-right mr-1"></i> Chuyển sang: ${getNextStatus(s.Status)}</button>` : '<div class="w-full py-2 text-center text-green-400 text-sm font-bold bg-green-500/10 rounded border border-green-500/20"><i class="fa fa-check mr-1"></i> Hoàn thành</div>'}
+            </div>
+        </div>`).join('');
+    } catch(e) { document.getElementById('shipperGrid').innerHTML = `<div class="text-red-400">Lỗi: ${e}</div>`; }
+  }
+
+  // --- SHARED UTILS ---
+  let currentShipmentId = null; 
+  async function openAssignModal(id, address) {
+    currentShipmentId = id; 
+    document.getElementById('assignShipmentLabel').innerText = `#${id}`;
+    document.getElementById('assignModal').classList.remove('hidden');
+    document.getElementById('assignModal').classList.add('flex');
+    const res = await fetch(`${API_URL}/users`);
+    const shippers = await res.json();
+    const list = document.getElementById('assignShipperList');
+    if(shippers.length === 0) list.innerHTML = '<div class="text-slate-400 p-2">Không tìm thấy Shipper nào.</div>';
+    else {
+        list.innerHTML = shippers.map(s => `<label class="flex items-center gap-3 p-3 glass rounded cursor-pointer hover:bg-white/5 transition-colors border border-transparent hover:border-cyan-500/50"><input type="radio" name="shipper" value="${s.UserID}" class="accent-cyan-400 w-4 h-4"><div><div class="neon text-sm font-semibold">${s.Username}</div><div class="text-xs text-slate-400">ID: ${s.UserID}</div></div></label>`).join('');
+    }
+    const confirmBtn = document.getElementById('assignConfirmBtn');
+    confirmBtn.onclick = submitAssign;
+    confirmBtn.disabled = false;
+  }
+  function closeAssignModal() { document.getElementById('assignModal').classList.add('hidden'); document.getElementById('assignModal').classList.remove('flex'); }
+  async function submitAssign() {
+    const selected = document.querySelector('input[name="shipper"]:checked');
+    if(!selected) return alert('Vui lòng chọn Shipper!');
+    const shipperId = selected.value; const user = loadUserFromLocal();
+    try {
+        const res = await fetch(`${API_URL}/assign-shipper`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ current_user_id: user.UserID, order_id: currentShipmentId, shipper_id: shipperId, address: 'N/A' }) });
+        const data = await res.json();
+        if(data.success) { alert("Phân công thành công!"); closeAssignModal(); initApp(); } else { alert('Lỗi: ' + (data.error || 'Không thể phân công.')); }
+    } catch(e) { alert("Lỗi API"); }
+  }
+  async function updateStatus(shipmentId, newStatus) {
+    const user = loadUserFromLocal();
+    try {
+        const res = await fetch(`${API_URL}/update-status`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ current_user_id: user.UserID, shipment_id: shipmentId, new_status: newStatus }) });
+        const data = await res.json(); if(data.success) initApp(); else alert('Lỗi: ' + (data.error || 'Không thể cập nhật'));
+    } catch(e) { alert("Lỗi API"); }
+  }
+  function getNextStatus(curr) { if(curr==='Pending') return 'Assigned'; if(curr==='Assigned') return 'Shipped'; if(curr==='Shipped') return 'Delivered'; return 'Delivered'; }
+  </script>
+</body>
+</html>

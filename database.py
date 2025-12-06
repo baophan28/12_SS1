@@ -15,8 +15,6 @@ class Database:
         try:
             conn = self.get_connection()
             cursor = conn.cursor()
-            
-            # SỬA CÂU SQL: Thêm điều kiện AND u.PasswordHash = ?
             sql = """
                 SELECT u.UserID, u.Username, r.RoleName 
                 FROM users u
@@ -108,7 +106,7 @@ class Database:
         finally:
             if 'conn' in locals(): conn.close()
 
-    # --- ADMIN (QUẢN LÝ USER - MỚI) ---
+    # --- ADMIN (QUẢN LÝ USER ) ---
     def get_all_users(self):
         try:
             conn = self.get_connection()

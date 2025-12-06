@@ -68,8 +68,6 @@ Mở Terminal (CMD hoặc PowerShell) tại thư mục dự án và chạy lện
    Ví dụ: 
    SERVER=DESKTOP-O30DQG9\SQLEXPRESS;
 
- Lưu file lại (Ctrl + S).
-
 5. CÁCH CHẠY ỨNG DỤNG
 --------------------------------------------------------------------------
 Bước 1: Khởi động Server Python
@@ -195,18 +193,6 @@ bcrypt, Argon2) được tạo từ ứng dụng Backend của bạn.
     bảng nghiệp vụ (ví dụ: orders, products), không nhất thiết
     cần quyền `SELECT` trực tiếp trên các bảng [users] hoặc [roles].
 ----------------------------------------------------------------------
-7.TEAM CONTRIBUTION BREAKDOWN:
-----------------------------------------------------------------------
-     Member's Name     +           Contribution(%)
------------------------+---------------------------------------
-1.Ngô Văn Huy(Lead)    +                19%  
-2.Nguyễn Văn Ngọc Hảo  +                19%
-3.Trần Thái Hưng       +                19%
-4.Phan Gia Bảo         +                19%
-5.Đinh Xuân Hiệp       +                19%
-6.Nguyễn Lê Tấn Phúc   +                5%
-
-
 
 
 

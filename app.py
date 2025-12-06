@@ -6,7 +6,7 @@ app = Flask(__name__)
 CORS(app) 
 
 # --- CẤU HÌNH KẾT NỐI ---
-# !!! QUAN TRỌNG: Hãy thay 'SERVER=...' bằng tên máy của bạn !!!
+#  QUAN TRỌNG: Hãy thay 'SERVER=...' bằng tên máy của bạn 
 CONN_STR = (
     "DRIVER={ODBC Driver 17 for SQL Server};"
     "SERVER=LOCALHOST;" 

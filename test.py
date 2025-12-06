@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from app import app # Import app flask của bạn
+from app import app 
 
 class TestShoesShopAPI(unittest.TestCase):
 
@@ -9,7 +9,7 @@ class TestShoesShopAPI(unittest.TestCase):
         self.app = app.test_client()
         self.app.testing = True
 
-    # --- TEST 1: ĐĂNG NHẬP (LOGIN) ---
+    # --- TEST 1: ĐĂNG NHẬP  ---
     @patch('app.db.login') # Giả lập hàm db.login
     def test_login_success(self, mock_db_login):
         # 1. Chuẩn bị kết quả giả (Mock Data)
@@ -26,7 +26,7 @@ class TestShoesShopAPI(unittest.TestCase):
         payload = {"username": "admin_user", "password": "123"}
         response = self.app.post('/api/login', json=payload)
 
-        # 3. Kiểm tra kết quả (Assert)
+        # 3. Kiểm tra kết quả 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['Username'], 'admin_user')
         print("\n[PASS] Test Login Success")
